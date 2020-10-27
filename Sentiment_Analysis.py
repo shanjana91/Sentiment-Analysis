@@ -1,3 +1,7 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 #list of punctuation characters to be striped
 punctuation_chars = ["'", '"', ",", ".", "!", ":", ";", '#', '@']
 
@@ -57,16 +61,33 @@ def run(file):
     # with open(file_name,"r") as twitter_file:
     twitter_file=open(file_name,"r")
     lines=twitter_file.readlines()
-    
+    net_score=0
+    net_score_list=[]
+    no_of_tweets=[]
     for line in lines[1:]: #skip header line
         line_list=line.strip().split(",") 
         if line_list==['']: #if file has an empty line ignore and continue to next line
             continue
-        result_string_row="{},{},{},{},{}".format(line_list[1],line_list[2],get_pos(line_list[0]),get_neg(line_list[0]),get_pos(line_list[0])-get_neg(line_list[0]))
-        
+        net_score=get_pos(line_list[0])-get_neg(line_list[0])
+        net_score_list.append(net_score)
+        no_of_tweets.append(line_list[1])
+        result_string_row="{},{},{},{},{}".format(line_list[1],line_list[2],get_pos(line_list[0]),get_neg(line_list[0]),net_score)
         result_file.write(result_string_row)
         result_file.write("\n")
     result_file.close()
+    
+    #creating a dataframe
+    df=pd.DataFrame()
+    df['x']=net_score_list
+    df['y']=no_of_tweets
+    print(df.head())
+    
+    #Scatter plot of the dataframe
+    sns.scatterplot('x','y',data=df)
+    plt.title("Sentiment Classfier")
+    plt.xlabel("Net Sentiment Score")
+    plt.ylabel("Number of Retweets")
+    plt.show()
 
 
 if __name__ == '__main__':
